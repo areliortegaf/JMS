@@ -1,0 +1,100 @@
+CREAR UNA FILA JMS (QUEUE) USANDO GLASFISH:
+CREAMOS JMS CONECTIONS Y DESTINATIONS PARA DESARROLLAR SOLUCIONES DE JMS.
+LOS CONECTION FACTORIES ESTAN CONFIGURADAS YA EN JAVA 7.
+
+Creamos un proyecto web.
+click derecho en el proyecto
+nuevo->GlassFish->JMS Resource
+Next
+Ponemos un nombre al JNDI: jms/miQueue
+Descriptcion: Queue para pruebas
+Lo demas lo dejamos igua y le damos next
+--EN LA VENTANA SIGUIENTE NOS PIDE QUE NO DEJEMS EN BANCO LOS CAMPOS--
+En value: ponemos el nombre del jndi sin el jms (miQueue)
+Posicionamos el cursor sobre Name, pero lo dejamos igua
+con esto se activa el boton FINISH
+LO PRESIONAMOS.
+
+Para checar si se agrego, vamos a:
+Services->Glasfish server->Resources->Admin object Resources.
+-------------------------------------------------------------------------------
+CREAR UN JMS WEB Queue PRODUCER Y CONSUMER.
+PARA CREAR UN PRODUCER:
+CREAMOS EN EL PAQUETE UNA CLASE DE JAVA NORMAL
+A LA CLASE CREADA LE AGREGAMOS LA ANOTACION:
+	@REQUESTSCOPED
+EL CONSTRUCTOR DE LA CLASE DEBE DE SER SIMPLE (VACIO)
+ARRIBA DEL CONSTRUCTOR INYECTAMOS EL JMSContext.
+
+@Inject
+private JMSContext context;
+@Resource(lookup = "jms/miQueue")
+private Queue queue;
+
+Agregamos el metodo mensaje que toma argumento tipo string y regresa un mensaje.
+
+//PARA QUE FUNCIONE SE TIENE QUE CASTEAR
+public void mandarMensaje(String Mensaje){
+context.createProducer().send(queue, Mensaje)
+}
+
+
+CREAMOS UN CONSUMER:
+Creamos una clase noramal de java:
+Agregamos a la classe la anotacion
+	@RequestScoped
+AGREGAMOS UN LOGUER A LA CLASE:
+private static final Looger logger = Logger.getLogger("com.pack.clase");//la clase debe de ser la...
+El constructor debe de ser simple.
+Sobre el contructor agregamos:
+
+@Inject
+private JMSContext context;
+@Resource(lookup = "jms/miQueue")
+private Queue queue;
+
+creamos un metodo que se llame recibirMensaje()
+
+public void recibirMensaje(){
+try(JMSConsumer consumer = context.createConsumer(queue)){
+Message m = consumer.recieve(1000);
+if(m != null){
+logger.log(Level.INFO, "Recieved Message" + m.getBody(String.class));
+
+}else{
+logger.log(Level.INFO, "Mensaje no recibido");
+}
+}catch(JMSException e){
+logger.log(Level.INFO, "Exception " + e)
+}
+}
+
+
+CREAMOS UN SERVLET Y LO MODIFICAMOS PARA USAR LOS BEANS.
+(ver practica ;p)
+
+tambien debemos agregar el boton y los campos de texto para que funcione.
+
+Al mandar el mensaje, se ira a la pagnia de mensaje recibido.
+
+El mensaje que mandamos lo podemos ver en la consola de glasfish.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
